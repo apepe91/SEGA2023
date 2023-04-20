@@ -2,7 +2,7 @@
 **MICCAI 2023 CHALLENGE SEG.A. - Segmentation of the Aorta**
 
 
-This repository has everything you need to submit your algorithm to <b>SEG.A. 2023</b>.
+This repository has everything you need to submit your algorithm to <b>[SEG.A. 2023](https://multicenteraorta.grand-challenge.org/)</b>.
 
 All verified accounts on Grand Challenge who joined the SEG.A. challenge will be able to submit their algorithm as Docker container directly on the challenge website: https://multicenteraorta.grand-challenge.org/
 
