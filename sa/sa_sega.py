@@ -2,18 +2,6 @@ import math
 import pandas as pd
 import numpy as np
 import chaospy as cp
-from matplotlib import pyplot
-import xlrd
-import openpyxl
-from pathlib import Path
-
-
-class Solution(object):
-    a = 3
-
-
-class PceCompute:
-    samples = 4
 
 
 class SobolIndices:
@@ -62,13 +50,6 @@ class SobolIndices:
         return sum(a**2 for a in PCE_coeff_without_first)
 
 
-# define function for testing
-# def ishigamiFunction(x):
-#     x1, x2, x3 = x
-#     return math.sin(x1) + 7 * math.sin(x2) * math.sin(x2) + 0.1 * x3**4 * math.sin(x1)
-
-
-# solver = Solution()
 samplesXLSX = pd.read_excel("sa/01_in_ishigami1000.xlsx")
 modelEval = samplesXLSX.loc[:, "out1"].to_numpy()
 samples = np.transpose(samplesXLSX.loc[:, ["x1", "x2", "x3"]].to_numpy())
@@ -85,7 +66,7 @@ jointInputDistr = cp.J(x1, x2, x3)
 # print("samples: ", samplesCP)
 
 # generate orthogonal basis polynomials
-pce_degree = 8
+pce_degree = 10
 expansion = cp.generate_expansion(pce_degree, jointInputDistr)
 
 # modelEvalCP = np.array([ishigamiFunction(sample) for sample in np.transpose(samplesCP)])
@@ -98,7 +79,7 @@ pceModel = cp.fit_regression(expansion, samples, modelEval)
 # pyplot.show()
 poly = cp.polynomial(pceModel)
 pceCoeff = poly.coefficients
-# print("coeff: ", pceCoeff)
+print("coeff: ", pceCoeff)
 pce_multiAlpha = poly.exponents
 # print("exponents: ", pce_multiAlpha)
 
