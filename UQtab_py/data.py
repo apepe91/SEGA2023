@@ -24,13 +24,6 @@ samplesXLSX = pd.read_excel("sa/01_in_ishigami1000.xlsx")
 modelEval = samplesXLSX.loc[:, "out1"].to_numpy()
 samples = np.transpose(samplesXLSX.loc[:, ["x1", "x2", "x3"]].to_numpy())
 
-# data = UserData()
-# for row in samples:
-#     print(row)
-# inputs = [OneInput(row) for row in samples]
-# for input in inputs:
-#     print(input.pdf)
+inputs = [OneInput(row) for row in samples]
 
 outputs = [OneOutput(modelEval)]
-for output in outputs:
-    print(output.pdf)
