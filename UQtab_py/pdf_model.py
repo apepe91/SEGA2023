@@ -32,17 +32,17 @@ class IsoProb_transform:
         self.u = self.isoprobTransf_stdPDF_vector(self.cdf, pdf)
 
     def getCDF_vector(self, data, pdf):
-        if pdf["name"] == "uniform":
-            cdf_x = Stati.cdf_uniform(data, pdf["parameters"][0], pdf["parameters"][1])
+        if pdf.name == "uniform":
+            cdf_x = Stati.cdf_uniform(data, pdf.parameters[0], pdf.parameters[1])
             return cdf_x
-        elif pdf["name"] == "normal":
-            cdf_x = Stati.cdf_normal(data, pdf["parameters"][0], pdf["parameters"][1])
+        elif pdf.name == "normal":
+            cdf_x = Stati.cdf_normal(data, pdf.parameters[0], pdf.parameters[1])
             return cdf_x
         else:
             raise ValueError("UQTAB Error - Iso Prob not yet implemented")
 
     def isoprobTransf_stdPDF_vector(self, cdf_x, pdf):
-        if pdf["name"] == "uniform":
+        if pdf.name == "uniform":
             cdf_u = []
             pdf_stdUniform = {
                 "name": "uniform",
@@ -82,15 +82,15 @@ class OnePdf:
     def __init__(self, data=None):
         inferredPDF = self.statInference(data)
 
-        self.name = inferredPDF.name
-        self.nickname = inferredPDF.nickname
-        self.parameters = inferredPDF.parameters
-        self.bounds = inferredPDF.bounds
-        self.likelihood = inferredPDF.likelihood
-        self.AIC = inferredPDF.AIC
-        self.BIC = inferredPDF.BIC
-        self.KS = inferredPDF.KS
-        self.selectionResult = inferredPDF.selectionResult
+        self.name = inferredPDF["name"]
+        self.nickname = inferredPDF["nickname"]
+        self.parameters = inferredPDF["parameters"]
+        self.bounds = inferredPDF["bounds"]
+        self.likelihood = inferredPDF["likelihood"]
+        self.AIC = inferredPDF["AIC"]
+        self.BIC = inferredPDF["BIC"]
+        self.KS = inferredPDF["KS"]
+        self.selectionResult = inferredPDF["selectionResult"]
 
     def statInference(self, data):
         selectionWeights = [0.3, 0.2, 0.5]
@@ -99,7 +99,9 @@ class OnePdf:
         tested_pdf.append(self.inferenceUniform(data, selectionWeights))
         tested_pdf.append(self.inferenceNormal(data, selectionWeights))
         tested_pdf.append(self.inferenceGumbel(data, selectionWeights))
-        tested_pdf.sort(key=lambda x: x.selectionResult)
+
+        # Sort the tested PDF based on selection method (PATENT)
+        tested_pdf.sort(key=lambda x: x["selectionResult"])
 
         return tested_pdf[0]
 
@@ -144,16 +146,14 @@ class OnePdf:
         }
 
     def normalPdf_likelihood(self, randomVector):
-        return self.normalPdf_values(randomVector).reduce(
-            lambda res, curr: res + math.log(curr)
-        )
+        return sum(math.log(value) for value in self.normalPdf_values(randomVector))
 
     def normalPdf_values(self, randomVector):
         estimatedParams = self.normalPdf_estimatedParam(randomVector)
-        return self.pdf_normal(randomVector, estimatedParams[0], estimatedParams[1])
+        return Stati.pdf_normal(randomVector, estimatedParams[0], estimatedParams[1])
 
     def normalPdf_estimatedParam(self, randomVector):
-        return [self.mean(randomVector), self.sampleStd(randomVector)]
+        return [Stati.mean(randomVector), Stati.sampleStd(randomVector)]
 
     def inferenceNormal(self, randomVector, weights) -> Inferred_pdf:
         normalPdf_EstimatedParameters = self.normalPdf_estimatedParam(randomVector)
@@ -164,8 +164,8 @@ class OnePdf:
         )
         ks_stat = self.computeKStest(
             randomVector,
-            self.sortElements(
-                self.cdf_normal(
+            Dati.sortElements(
+                Stati.cdf_normal(
                     randomVector,
                     normalPdf_EstimatedParameters[0],
                     normalPdf_EstimatedParameters[1],
