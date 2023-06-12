@@ -54,8 +54,8 @@ class OneInput:
 
 class Output:
     def __init__(self, raw):
-        dataNoHeaders = [col[1:] for col in raw]
-        self.data = [[convertStringToNumber(x) for x in col] for col in dataNoHeaders]
+        # dataNoHeaders = [col[1:] for col in raw]
+        self.data = raw
         self.names = [col[0] for col in raw]
         self.Nout = len(raw)
         self.Ns = len(unzip(self.data))
@@ -63,8 +63,8 @@ class Output:
 
 class OneOutput:
     def __init__(self, raw):
-        raw_noHead = raw[1:]
-        self.data = [convertStringToNumber(x) for x in raw_noHead]
-        self.name = raw[0]
+        # raw_noHead = raw[1:]
+        self.data = raw
+        # self.name = raw[0]
         self.Ns = len(self.data)
         self.pdf = OnePdf(self.data)

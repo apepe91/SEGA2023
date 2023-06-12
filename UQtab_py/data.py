@@ -27,7 +27,10 @@ samples = np.transpose(samplesXLSX.loc[:, ["x1", "x2", "x3"]].to_numpy())
 # data = UserData()
 # for row in samples:
 #     print(row)
-inputs = [OneInput(row) for row in samples]
-for input in inputs:
-    print(input.pdf)
-# output = Output(modelEval)
+# inputs = [OneInput(row) for row in samples]
+# for input in inputs:
+#     print(input.pdf)
+
+outputs = [OneOutput(modelEval)]
+for output in outputs:
+    print(output.pdf)
