@@ -2,59 +2,72 @@ import math
 import pygpc
 import pandas as pd
 import numpy as np
+import matplotlib
+from collections import OrderedDict
 
+save_session_format = (
+    ".pkl"  # file format of saved gpc session ".hdf5" (slow) or ".pkl" (fast)
+)
 
+# load samples
 samplesXLSX = pd.read_excel("sa/01_in_ishigami1000.xlsx")
-samples = np.transpose(samplesXLSX.loc[:, ["x1", "x2", "x3"]].to_numpy())
-
-# collect samples and model output
-p = dict()
-p["x1"] = samples[0]
-p["x2"] = samples[1]
-p["x3"] = samples[2]
+samples = samplesXLSX.loc[:, ["x1", "x2", "x3"]].to_numpy()
 modelEval = samplesXLSX.loc[:, "out1"].to_numpy()
-problem = pygpc.Problem()
+
+Ns = len(samples)
+M_dim = len(samples.T)
+# print(samples.T[0])
+
+# define input pdfs
+parameters = OrderedDict()
+parameters["x1"] = pygpc.Beta(
+    pdf_shape=[1, 1], pdf_limits=[min(samples.T[0]), max(samples.T[0])]
+)  # uniform distribution
+parameters["x2"] = pygpc.Beta(
+    pdf_shape=[1, 1], pdf_limits=[min(samples.T[1]), max(samples.T[1])]
+)  # uniform distribution
+parameters["x3"] = pygpc.Beta(
+    pdf_shape=[1, 1], pdf_limits=[min(samples.T[2]), max(samples.T[2])]
+)  # uniform distribution
+
+# CREATE A GRID USING YOUR SAMPLING POINTS
+grid = pygpc.RandomGrid(parameters_random=parameters, options={"n_grid": Ns, "seed": 1})
+
 
 # gPC options
 options = dict()
 options["method"] = "reg"
-options["solver"] = "Moore-Penrose"
+options["solver"] = "LarsLasso"
 options["settings"] = None
-options["order"] = [9, 9]
-options["order_max"] = 9
-options["interaction_order"] = 2
-options["matrix_ratio"] = 2
-options["error_type"] = "nrmsd"
-options["n_samples_validation"] = 1e3
-options["n_cpu"] = 0
-options["fn_results"] = None
-options["gradient_enhanced"] = True
-options["gradient_calculation"] = "FD_1st2nd"
-options["gradient_calculation_options"] = {"dx": 0.05, "distance_weight": -2}
+options["order"] = [10, 10, 10]
+options["order_max"] = 10
+options["interaction_order"] = 3
+options["error_type"] = "loocv"
+options["n_samples_validation"] = None
+options["fn_results"] = modelEval
+options["save_session_format"] = save_session_format
 options["backend"] = "omp"
-options["grid"] = pygpc.Random
-options["grid_options"] = None
+options["verbose"] = True
 
-# determine number of basis functions
+# estimate the number of gPC coefficients
 n_coeffs = pygpc.get_num_coeffs_sparse(
     order_dim_max=options["order"],
     order_glob_max=options["order_max"],
     order_inter_max=options["interaction_order"],
-    dim=3,
+    dim=len(parameters),
+    order_inter_current=None,
+    order_glob_max_norm=1.0,
 )
+print(n_coeffs)  # same as UQtab
 
-# generate grid
-grid = pygpc.Random(
-    parameters_random=problem.parameters_random,
-    n_grid=options["matrix_ratio"] * n_coeffs,
-    options={"seed": 1},
+# define algorithm
+algorithm = pygpc.Static_IO(
+    parameters=parameters, options=options, grid=grid, results=modelEval
 )
-
-# initialize algorithm
-algorithm = pygpc.Static(problem=problem, options=options, grid=grid)
 
 # initialize gPC Session
 session = pygpc.Session(algorithm=algorithm)
 
 # run gPC algorithm
 session, coeffs, results = session.run()
+print(session)
