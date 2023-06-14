@@ -19,3 +19,4 @@ hidden = [Hidden(samples)]
 
 
 pce = Pce(samples, modelEval, u_matrix, inputPDF, hidden[0].pceDegree)
+print(pce)

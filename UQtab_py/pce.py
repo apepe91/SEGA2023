@@ -1,6 +1,7 @@
 import math
 from pce_predict import PcePredict
 from regression import regression
+from typing import List
 
 
 def getPCEdegree(input):
@@ -17,7 +18,14 @@ def getPCEdegree(input):
 
 
 class iOrthogonalPolynomial:
-    def __init__(self, name, bounds, degree, Aterms, Bterms):
+    def __init__(
+        self,
+        name: str,
+        bounds: List[float],
+        degree: int,
+        Aterms: List[float],
+        Bterms: List[float],
+    ):
         self.name = name
         self.bounds = bounds
         self.degree = degree
@@ -27,10 +35,8 @@ class iOrthogonalPolynomial:
 
 class Pce:
     def __init__(self, input_data, output, u_matrix, pdf, pce_degree):
-        self.pce = [
-            OutputPce(input_data, out.data, u_matrix, pdf, pce_degree) for out in output
-        ]
-        self.predictPce = [PcePredict(self.pce) for _ in output]
+        self.pce = [OutputPce(input_data, output, u_matrix, pdf, pce_degree)]
+        # self.predictPce = [PcePredict(self.pce) for _ in output]
 
 
 class OutputPce:
@@ -49,8 +55,10 @@ class OutputPce:
         self.coeffs = regression(self.output, self.Psi_alpha)
         self.cardAlpha = len(self.alphaIdx)
 
-    def evaluated_multivariate_orthoPoly(self, multiPoly, u_matrix):
-        multiVariate_matrix = []
+    def evaluated_multivariate_orthoPoly(
+        self, multiPoly: List[iOrthogonalPolynomial], u_matrix: List[List[float]]
+    ) -> List[List[List[float]]]:
+        multiVariate_matrix = []  # M x Ns x P
         for i in range(len(u_matrix)):
             multiVariate_matrix.append(
                 self.evaluate_univariate_orthoPoly(multiPoly[i], u_matrix[i])
@@ -59,16 +67,18 @@ class OutputPce:
         return multiVariate_matrix
 
     def evaluate_univariate_orthoPoly(self, multiPoly, u_vector):
-        univariate_matrix = []  # Ns x P
+        univariate_matrix = [
+            ["" for _ in range(multiPoly["degree"] + 1)] for _ in range(len(u_vector))
+        ]
+        # univariate_matrix = [[], []]  # Ns x P
         for ns in range(len(u_vector)):
-            univariate_matrix.append(
-                self.evaluate_orthoPoly_dataPoint(
-                    multiPoly["Aterms"],
-                    multiPoly["Bterms"],
-                    multiPoly["degree"],
-                    u_vector[ns],
-                )
+            univariate_matrix[ns] = self.evaluate_orthoPoly_dataPoint(
+                multiPoly["Aterms"],
+                multiPoly["Bterms"],
+                multiPoly["degree"],
+                u_vector[ns],
             )
+
         return univariate_matrix
 
     def evaluate_orthoPoly_dataPoint(self, Aterms, Bterms, degree, u_dataPt):
@@ -83,7 +93,7 @@ class OutputPce:
                 - (orthoPoly_pointEvaluation[d] * Bterms[d]) / Bterms[d + 1]
             )
 
-        return orthoPoly_pointEvaluation.pop(0)
+        return orthoPoly_pointEvaluation[1:]
 
     def compute_Psi_alpha_matrix(self, alpha, Mo):
         Ns = len(Mo[0])
