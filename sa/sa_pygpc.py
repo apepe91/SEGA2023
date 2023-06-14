@@ -78,7 +78,7 @@ def main():
     # run gPC algorithm
     session, coeffs, results = session.run()
 
-    pygpc.get_sensitivities_hdf5(
+    return pygpc.get_sensitivities_hdf5(
         fn_gpc=options["fn_results"],
         output_idx=None,
         calc_sobol=True,
@@ -87,17 +87,6 @@ def main():
         algorithm="standard",
     )
 
-    pygpc.plot_gpc(
-        session=session,
-        coeffs=coeffs,
-        random_vars=["x1", "x2", "x3"],
-        output_idx=0,
-        n_grid=[Ns, Ns],
-        coords=grid.coords,
-        results=results,
-        fn_out=None,
-    )
-
 
 if __name__ == "__main__":
-    main()
+    sensitivitiy_indices = main()
