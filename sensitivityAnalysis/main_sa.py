@@ -13,7 +13,7 @@ class SEGAsensitivity(object):
         inputPDF.extend([input.pdf for input in inputs])
         u_matrix = []
         u_matrix.extend([input.u_vector.u for input in inputs])
-        outputs = [OneOutput(output)]
+        # outputs = [OneOutput(output)]
 
         hidden = [Hidden(input)]
 
@@ -34,7 +34,7 @@ class SEGAsensitivity(object):
         )
 
 
-class Criteria(object):
+class SEGAcriteria(object):
     def computeP1(sensitivityIndices, inputDim):
         p1Sum = 0
         for index in sensitivityIndices.sensAnalysis[0].indices[0].firstSobol:
@@ -47,39 +47,31 @@ class Criteria(object):
         p2Sum = sum((a - b) for a, b in zip(totalSobol, firstSobol))
         return 1 - p2Sum
 
-    def computeP3(values, challengeVar, challengeSkew):
+    def computeP3(values):
         weights = [0.6, 0.25, 0.15]
-        mode = Stati.mode(values)
+        mode_gm = Stati.mode(values)
         mean = Stati.mean(values)
-        var = Stati.sampleVar(values)
+        var_gm = Stati.sampleVar(values)
         std = Stati.sampleStd(values)
         skewNum = 0
         for value in values:
             skewNum += (value - mean) ** 3
-        skew = skewNum / ((len(values) - 1) * std**3)
+        skew_gm = skewNum / ((len(values) - 1) * std**3)
 
-        return (
-            weights[0] / mode
-            + weights[1] * (1 - (var / challengeVar))
-            + weights[2] * (1 - (abs(skew) / challengeSkew))
-        )
+        return weights[0] / mode_gm + weights[1] / var_gm + weights[2] / abs(skew_gm)
 
-    def computeP4(values, challengeVar, challengeSkew):
+    def computeP4(values):
         weights = [0.6, 0.25, 0.15]
-        mode = Stati.mode(values)
+        mode_gm = Stati.mode(values)
         mean = Stati.mean(values)
-        var = Stati.sampleVar(values)
+        var_gm = Stati.sampleVar(values)
         std = Stati.sampleStd(values)
         skewNum = 0
         for value in values:
             skewNum += (value - mean) ** 3
-        skew = skewNum / ((len(values) - 1) * std**3)
+        skew_gm = skewNum / ((len(values) - 1) * std**3)
 
-        return (
-            weights[0] * mode
-            + weights[1] * (1 - (var / challengeVar))
-            + weights[2] * (1 - (abs(skew) / challengeSkew))
-        )
+        return weights[0] * mode_gm + weights[1] / var_gm + weights[2] / abs(skew_gm)
 
 
 sensitivity = SEGAsensitivity()
@@ -90,9 +82,17 @@ samples = np.transpose(samplesXLSX.loc[:, ["x1", "x2", "x3"]].to_numpy())
 
 sa = sensitivity.computeSobolIndices(samples, modelEval)
 
-p1 = Criteria.computeP1(sa, len(samples))
-p2 = Criteria.computeP2(sa)
-p3 = Criteria.computeP3(samples[0], 1, 1)
-print("p3:", p3)
-p4 = Criteria.computeP4(samples[1], 1, 1)
-print("p4:", p4)
+p1 = SEGAcriteria.computeP1(sa, len(samples))
+p2 = SEGAcriteria.computeP2(sa)
+p3_test = pd.read_excel("test_fun/p3_testing.xlsx")
+p3values_test = np.transpose(p3_test.loc[:, ["good", "bad"]].to_numpy())
+p4_test = pd.read_excel("test_fun/p3_testing.xlsx")
+p4values_test = np.transpose(p4_test.loc[:, ["good", "bad"]].to_numpy())
+p3_good = SEGAcriteria.computeP3(p3values_test[0])
+print("p3good:", p3_good)
+p3_bad = SEGAcriteria.computeP3(p3values_test[1])
+print("p3bad:", p3_bad)
+p4_good = SEGAcriteria.computeP4(p4values_test[0])
+print("p4good:", p4_good)
+p4_bad = SEGAcriteria.computeP4(p4values_test[1])
+print("p4bad:", p4_bad)
