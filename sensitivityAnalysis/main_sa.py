@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from userData import OneInput, OneOutput, Hidden
+from userData import OneInput, Hidden
 from pce import Pce
 from sensitivityAnalysis import SensitivityAnalysis
 from statisticalOp import Stati
@@ -53,6 +53,7 @@ class SEGAcriteria(object):
         mean = Stati.mean(values)
         var_gm = Stati.sampleVar(values)
         std = Stati.sampleStd(values)
+        skewTest = Stati.skewness(values)
         skewNum = 0
         for value in values:
             skewNum += (value - mean) ** 3
@@ -66,6 +67,7 @@ class SEGAcriteria(object):
         mean = Stati.mean(values)
         var_gm = Stati.sampleVar(values)
         std = Stati.sampleStd(values)
+        skewTest = Stati.skewness(values)
         skewNum = 0
         for value in values:
             skewNum += (value - mean) ** 3
