@@ -3,6 +3,7 @@ import numpy as np
 from userData import OneInput, OneOutput, Hidden
 from pce import Pce
 from sensitivityAnalysis import SensitivityAnalysis
+from statisticalOp import Stati
 
 
 class SEGAsensitivity(object):
@@ -46,6 +47,40 @@ class Criteria(object):
         p2Sum = sum((a - b) for a, b in zip(totalSobol, firstSobol))
         return 1 - p2Sum
 
+    def computeP3(values, challengeVar, challengeSkew):
+        weights = [0.6, 0.25, 0.15]
+        mode = Stati.mode(values)
+        mean = Stati.mean(values)
+        var = Stati.sampleVar(values)
+        std = Stati.sampleStd(values)
+        skewNum = 0
+        for value in values:
+            skewNum += (value - mean) ** 3
+        skew = skewNum / ((len(values) - 1) * std**3)
+
+        return (
+            weights[0] / mode
+            + weights[1] * (1 - (var / challengeVar))
+            + weights[2] * (1 - (abs(skew) / challengeSkew))
+        )
+
+    def computeP4(values, challengeVar, challengeSkew):
+        weights = [0.6, 0.25, 0.15]
+        mode = Stati.mode(values)
+        mean = Stati.mean(values)
+        var = Stati.sampleVar(values)
+        std = Stati.sampleStd(values)
+        skewNum = 0
+        for value in values:
+            skewNum += (value - mean) ** 3
+        skew = skewNum / ((len(values) - 1) * std**3)
+
+        return (
+            weights[0] * mode
+            + weights[1] * (1 - (var / challengeVar))
+            + weights[2] * (1 - (abs(skew) / challengeSkew))
+        )
+
 
 sensitivity = SEGAsensitivity()
 
@@ -57,3 +92,7 @@ sa = sensitivity.computeSobolIndices(samples, modelEval)
 
 p1 = Criteria.computeP1(sa, len(samples))
 p2 = Criteria.computeP2(sa)
+p3 = Criteria.computeP3(samples[0], 1, 1)
+print("p3:", p3)
+p4 = Criteria.computeP4(samples[1], 1, 1)
+print("p4:", p4)
