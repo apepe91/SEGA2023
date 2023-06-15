@@ -18,8 +18,9 @@ class SEGAsensitivity(object):
 
         pce = Pce(input, output, u_matrix, inputPDF, hidden[0].pceDegree)
 
-        sensitivityResults = SensitivityAnalysis(input, output, pce)
-        SEGAsensitivity.printResults(self, sensitivityResults)
+        result = SensitivityAnalysis(input, output, pce)
+        SEGAsensitivity.printResults(self, result)
+        return result
 
     def printResults(self, sensitivityResults):
         print(
@@ -32,10 +33,27 @@ class SEGAsensitivity(object):
         )
 
 
+class Criteria(object):
+    def computeP1(sensitivityIndices, inputDim):
+        p1Sum = 0
+        for index in sensitivityIndices.sensAnalysis[0].indices[0].firstSobol:
+            p1Sum += abs(index - 1 / inputDim)
+        return 1 - p1Sum
+
+    def computeP2(sensitivityIndices):
+        firstSobol = sensitivityIndices.sensAnalysis[0].indices[0].firstSobol
+        totalSobol = sensitivityIndices.sensAnalysis[0].indices[0].totalSobol
+        p2Sum = sum((a - b) for a, b in zip(totalSobol, firstSobol))
+        return 1 - p2Sum
+
+
 sensitivity = SEGAsensitivity()
 
 samplesXLSX = pd.read_excel("sa/01_in_ishigami1000.xlsx")
 modelEval = samplesXLSX.loc[:, "out1"].to_numpy()
 samples = np.transpose(samplesXLSX.loc[:, ["x1", "x2", "x3"]].to_numpy())
 
-result = sensitivity.computeSobolIndices(samples, modelEval)
+sa = sensitivity.computeSobolIndices(samples, modelEval)
+
+p1 = Criteria.computeP1(sa, len(samples))
+p2 = Criteria.computeP2(sa)
