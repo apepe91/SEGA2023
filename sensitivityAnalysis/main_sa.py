@@ -84,7 +84,7 @@ class Criteria(object):
 
 sensitivity = SEGAsensitivity()
 
-samplesXLSX = pd.read_excel("sa/01_in_ishigami1000.xlsx")
+samplesXLSX = pd.read_excel("test_fun/01_in_ishigami1000.xlsx")
 modelEval = samplesXLSX.loc[:, "out1"].to_numpy()
 samples = np.transpose(samplesXLSX.loc[:, ["x1", "x2", "x3"]].to_numpy())
 
