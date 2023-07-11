@@ -19,21 +19,18 @@ Here are some useful documentation links for your submission process:
 
 You will need to have [Docker](https://docs.docker.com/) installed on your system. We recommend using Linux with a Docker installation. If you are on Windows, please use [WSL 2.0](https://docs.microsoft.com/en-us/windows/wsl/install).
 
+## Adapting the container to your algorithm
+A template for the submission container is available at [https://github.com/apepe91/SEGA2023/tree/main/SegaAlgorithm](https://github.com/apepe91/SEGA2023/tree/main/SegaAlgorithm)
+
+
 ## Prediction format
 
-**Main task**: The algorithm reads the test cases from a user-defined folder and saves the AVT segmentation in another user-defined folder. For each CTA volume in the input folder "*ctaXX.nrrd*", the algorithm saves a segmentation file "*ctaXX.seg.nrrd*" in the output folder. 
+**Main task**: Binary segmentation mask.
 
-**Subtask 1 (Optional)**: Additionally to the binary segmentation, the algorithm also generates a volumetric mesh. The volumetric mesh is saved in the same folder as the binary segmentation with filename "*ctaXX.msh*". 
+**Subtask 1 (Optional)**: Additionally to the binary segmentation, the algorithm also generates a surface mesh in the form of an OBJ file. The surface mesh will be qualitatively assessed and ranked by field specialists. If you do not wish to participate to this subtask, submit a small cube mesh (trimesh.primitives.Box()) as shown the template. 
 
-**Subtask 2 (Optional)**: Additionally to the binary segmentation, the algorithm also generates a surface mesh. The surface mesh is saved in the same folder as the binary segmentation with filename "*ctaXX.stl*". The STL files will be used for the qualitative evaluation. 
+**Subtask 2 (Optional)**: Additionally to the binary segmentation, the algorithm also generates a surface mesh in the form of an OBJ file. This additional surface mesh will be quantitatively assessed for the creation of a volumetric mesh. If you do not wish to participate to this subtask, submit a small cube mesh (trimesh.primitives.Box()) as shown the template. 
 
-## Adapting the container to your algorithm
-
-1. First, clone this repository:
-
-```
-git clone https://github.com/...
-```
 
 
 
