@@ -53,7 +53,7 @@ class SEGAcriteria(object):
         mean = Stati.mean(values)
         var_gm = Stati.sampleVar(values)
         std = Stati.sampleStd(values)
-        skewTest = Stati.skewness(values)
+        # skewTest = Stati.skewness(values)
         skewNum = 0
         for value in values:
             skewNum += (value - mean) ** 3
@@ -67,7 +67,7 @@ class SEGAcriteria(object):
         mean = Stati.mean(values)
         var_gm = Stati.sampleVar(values)
         std = Stati.sampleStd(values)
-        skewTest = Stati.skewness(values)
+        # skewTest = Stati.skewness(values)
         skewNum = 0
         for value in values:
             skewNum += (value - mean) ** 3

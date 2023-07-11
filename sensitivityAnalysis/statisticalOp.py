@@ -5,13 +5,13 @@ from scipy.stats import norm
 
 
 class Stati:
-    @staticmethod
-    def skewness(values):
-        skewNum = 0
-        mean = Stati.mean(values)
-        for value in values:
-            skewNum += (value - mean) ** 3
-        return skewNum / ((len(values) - 1) * Stati.sampleStd(values) ** 3)
+    # @staticmethod
+    # def skewness(values):
+    #     skewNum = 0
+    #     mean = Stati.mean(values)
+    #     for value in values:
+    #         skewNum += (value - mean) ** 3
+    #     return skewNum / ((len(values) - 1) * Stati.sampleStd(values) ** 3)
 
     @staticmethod
     def mean(vector: List[float]) -> float:
