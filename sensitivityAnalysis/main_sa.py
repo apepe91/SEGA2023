@@ -53,7 +53,6 @@ class SEGAcriteria(object):
         mean = Stati.mean(values)
         var_gm = Stati.sampleVar(values)
         std = Stati.sampleStd(values)
-        # skewTest = Stati.skewness(values)
         skewNum = 0
         for value in values:
             skewNum += (value - mean) ** 3
@@ -67,13 +66,30 @@ class SEGAcriteria(object):
         mean = Stati.mean(values)
         var_gm = Stati.sampleVar(values)
         std = Stati.sampleStd(values)
-        # skewTest = Stati.skewness(values)
         skewNum = 0
         for value in values:
             skewNum += (value - mean) ** 3
         skew_gm = skewNum / ((len(values) - 1) * std**3)
 
         return weights[0] * mode_gm + weights[1] / var_gm + weights[2] / abs(skew_gm)
+
+    def computePJ(values, invalid_elements):
+        weights = [0.3, 0.25, 0.15, 0.3]
+        mode_gm = Stati.mode(values)
+        mean = Stati.mean(values)
+        var_gm = Stati.sampleVar(values)
+        std = Stati.sampleStd(values)
+        skewNum = 0
+        for value in values:
+            skewNum += (value - mean) ** 3
+        skew_gm = skewNum / ((len(values) - 1) * std**3)
+
+        return (
+            weights[0] * mode_gm
+            + weights[1] / var_gm
+            + weights[2] / abs(skew_gm)
+            + weights[3] / Stati.mean(invalid_elements)
+        )
 
 
 sensitivity = SEGAsensitivity()
