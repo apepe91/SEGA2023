@@ -4,6 +4,7 @@ from userData import OneInput, Hidden
 from pce import Pce
 from sensitivityAnalysis import SensitivityAnalysis
 from statisticalOp import Stati
+import matplotlib.pyplot as plt
 
 
 class SEGAsensitivity(object):
@@ -35,6 +36,7 @@ class SEGAsensitivity(object):
 
 
 class SEGAcriteria(object):
+
     def computeP1(sensitivityIndices, inputDim):
         p1Sum = 0
         for index in sensitivityIndices.sensAnalysis[0].indices[0].firstSobol:
@@ -92,6 +94,20 @@ class SEGAcriteria(object):
         )
 
 
+p3_phase2 = pd.read_excel("test_fun/p3_phase2_SEGA23.xlsx")
+p3values_test = np.transpose(p3_phase2.loc[:, ["tpvagenas", "iwm"]].to_numpy())
+p3_tpvagenas = SEGAcriteria.computeP3(p3values_test[0])
+p3_iwm = SEGAcriteria.computeP3(p3values_test[1])
+print("p3_tpvagens:", p3_tpvagenas)
+print("p3_iwm:", p3_iwm)
+
+p4_phase2 = pd.read_excel("test_fun/p4_phase2_SEGA23.xlsx")
+p4values_test = np.transpose(p4_phase2.loc[:, ["tpvagenas", "iwm"]].to_numpy())
+p4_tpvagenas = SEGAcriteria.computeP4(p4values_test[0])
+p4_iwm = SEGAcriteria.computeP4(p4values_test[1])
+print("p4_tpvagens:", p4_tpvagenas)
+print("p4_iwm:", p4_iwm)
+
 sensitivity = SEGAsensitivity()
 
 samplesXLSX = pd.read_excel("test_fun/01_in_ishigami1000.xlsx")
@@ -100,17 +116,17 @@ samples = np.transpose(samplesXLSX.loc[:, ["x1", "x2", "x3"]].to_numpy())
 
 sa = sensitivity.computeSobolIndices(samples, modelEval)
 
-p1 = SEGAcriteria.computeP1(sa, len(samples))
-p2 = SEGAcriteria.computeP2(sa)
-p3_test = pd.read_excel("test_fun/p3_testing.xlsx")
-p3values_test = np.transpose(p3_test.loc[:, ["good", "bad"]].to_numpy())
-p4_test = pd.read_excel("test_fun/p3_testing.xlsx")
-p4values_test = np.transpose(p4_test.loc[:, ["good", "bad"]].to_numpy())
-p3_good = SEGAcriteria.computeP3(p3values_test[0])
-print("p3good:", p3_good)
-p3_bad = SEGAcriteria.computeP3(p3values_test[1])
-print("p3bad:", p3_bad)
-p4_good = SEGAcriteria.computeP4(p4values_test[0])
-print("p4good:", p4_good)
-p4_bad = SEGAcriteria.computeP4(p4values_test[1])
-print("p4bad:", p4_bad)
+# p1 = SEGAcriteria.computeP1(sa, len(samples))
+# p2 = SEGAcriteria.computeP2(sa)
+# p3_test = pd.read_excel("test_fun/p3_testing.xlsx")
+# p3values_test = np.transpose(p3_test.loc[:, ["good", "bad"]].to_numpy())
+# p4_test = pd.read_excel("test_fun/p3_testing.xlsx")
+# p4values_test = np.transpose(p4_test.loc[:, ["good", "bad"]].to_numpy())
+# p3_good = SEGAcriteria.computeP3(p3values_test[0])
+# print("p3good:", p3_good)
+# p3_bad = SEGAcriteria.computeP3(p3values_test[1])
+# print("p3bad:", p3_bad)
+# p4_good = SEGAcriteria.computeP4(p4values_test[0])
+# print("p4good:", p4_good)
+# p4_bad = SEGAcriteria.computeP4(p4values_test[1])
+# print("p4bad:", p4_bad)
