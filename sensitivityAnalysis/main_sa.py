@@ -50,7 +50,7 @@ class SEGAcriteria(object):
         return 1 - p2Sum
 
     def computeP3(values):
-        weights = [0.6, 0.25, 0.15]
+        weights = [0.8, 0.17, 0.03]
         mode_gm = Stati.mode(values)
         mean = Stati.mean(values)
         var_gm = Stati.sampleVar(values)
@@ -62,23 +62,8 @@ class SEGAcriteria(object):
 
         return weights[0] / mode_gm + weights[1] / var_gm + weights[2] / abs(skew_gm)
 
-    # def computeP3(values):  # loaded version in Docker
-    #     eps = 0.001
-    #     weights = [0.6, 0.25, 0.15]
-    #     mode_gm = Stati.mode(values)
-    #     mean = Stati.mean(values)
-    #     var_gm = Stati.sampleVar(values)
-    #     std = Stati.sampleStd(values)
-    #     # skewTest = Stati.skewness(values)
-    #     skewNum = 0
-    #     for value in values:
-    #         skewNum += (value - mean) ** 3
-    #     skew_gm = eps + skewNum / (eps + (len(values) - 1) * std**3)
-
-    #     return weights[0] / (eps+mode_gm) + weights[1] / (eps+var_gm) + weights[2] / abs(skew_gm)
-
     def computeP4(values):
-        weights = [0.6, 0.25, 0.15]
+        weights = [0.8, 0.15, 0.05]
         mode_gm = Stati.mode(values)
         mean = Stati.mean(values)
         var_gm = Stati.sampleVar(values)
@@ -89,21 +74,6 @@ class SEGAcriteria(object):
         skew_gm = skewNum / ((len(values) - 1) * std**3)
 
         return weights[0] * mode_gm + weights[1] / var_gm + weights[2] / abs(skew_gm)
-
-    # def computeP4(values):  # loaded version in Docker
-    #     eps = 0.001
-    #     weights = [0.6, 0.25, 0.15]
-    #     mode_gm = Stati.mode(values)
-    #     mean = Stati.mean(values)
-    #     var_gm = Stati.sampleVar(values)
-    #     std = Stati.sampleStd(values)
-    #     # skewTest = Stati.skewness(values)
-    #     skewNum = 0
-    #     for value in values:
-    #         skewNum += (value - mean) ** 3
-    #     skew_gm = eps + skewNum / (eps + (len(values) - 1) * std**3)
-    #     return weights[0] * mode_gm + weights[1] / \
-    #         (eps+var_gm) + weights[2] / abs(skew_gm)
 
     def computePJ(values, invalid_elements):
         weights = [0.3, 0.25, 0.15, 0.3]
@@ -124,45 +94,28 @@ class SEGAcriteria(object):
         )
 
 
-p3_phase2 = pd.read_excel("test_fun/p3_phase2_SEGA23.xlsx")
-p3values_test = np.transpose(
-    p3_phase2.loc[:, ["tpvagenas", "iwm", "sunshine"]].to_numpy())
-p3_tpvagenas = SEGAcriteria.computeP3(p3values_test[0])
-p3_iwm = SEGAcriteria.computeP3(p3values_test[1])
-p3_sunshine = SEGAcriteria.computeP3(p3values_test[2])
-print("p3_tpvagens:", p3_tpvagenas)
-print("p3_iwm:", p3_iwm)
-print("p3_sunshine:", p3_sunshine)
-
-p4_phase2 = pd.read_excel("test_fun/p4_phase2_SEGA23.xlsx")
-p4values_test = np.transpose(
-    p4_phase2.loc[:, ["tpvagenas", "iwm", "sunshine"]].to_numpy())
-p4_tpvagenas = SEGAcriteria.computeP4(p4values_test[0])
-p4_iwm = SEGAcriteria.computeP4(p4values_test[1])
-p4_sunshine = SEGAcriteria.computeP4(p4values_test[2])
-print("p4_tpvagens:", p4_tpvagenas)
-print("p4_iwm:", p4_iwm)
-print("p4_sunshine:", p4_sunshine)
+# p3_phase2 = pd.read_excel("test_fun/p3_phase2_SEGA23.xlsx")
+# p3values_test = np.transpose(
+#     p3_phase2.loc[:, ["tpvagenas", "iwm", "sunshine", "test"]].to_numpy())
+# p3_tpvagenas = SEGAcriteria.computeP3(p3values_test[0])
+# p3_iwm = SEGAcriteria.computeP3(p3values_test[1])
+# p3_sunshine = SEGAcriteria.computeP3(p3values_test[2])
+# p3_test = SEGAcriteria.computeP3(p3values_test[3])
+# print("p3_hd_tpvagens:", p3_tpvagenas)
+# print("p3_hd_iwm:", p3_iwm)
+# print("p3_hd_sunshine:", p3_sunshine)
+# print("p3_hd_test:", p3_test)
+# print("========================")
+# p4_phase2 = pd.read_excel("test_fun/p4_phase2_SEGA23.xlsx")
+# p4values_test = np.transpose(
+#     p4_phase2.loc[:, ["tpvagenas", "iwm", "sunshine", "test"]].to_numpy())
+# p4_tpvagenas = SEGAcriteria.computeP4(p4values_test[0])
+# p4_iwm = SEGAcriteria.computeP4(p4values_test[1])
+# p4_sunshine = SEGAcriteria.computeP4(p4values_test[2])
+# p4_test = SEGAcriteria.computeP3(p3values_test[3])
+# print("p4_dice_tpvagens:", p4_tpvagenas)
+# print("p4_dice_iwm:", p4_iwm)
+# print("p4_dice_sunshine:", p4_sunshine)
+# print("p4_dice_test:", p4_test)
 
 sensitivity = SEGAsensitivity()
-
-samplesXLSX = pd.read_excel("test_fun/01_in_ishigami1000.xlsx")
-modelEval = samplesXLSX.loc[:, "out1"].to_numpy()
-samples = np.transpose(samplesXLSX.loc[:, ["x1", "x2", "x3"]].to_numpy())
-
-sa = sensitivity.computeSobolIndices(samples, modelEval)
-
-# p1 = SEGAcriteria.computeP1(sa, len(samples))
-# p2 = SEGAcriteria.computeP2(sa)
-# p3_test = pd.read_excel("test_fun/p3_testing.xlsx")
-# p3values_test = np.transpose(p3_test.loc[:, ["good", "bad"]].to_numpy())
-# p4_test = pd.read_excel("test_fun/p3_testing.xlsx")
-# p4values_test = np.transpose(p4_test.loc[:, ["good", "bad"]].to_numpy())
-# p3_good = SEGAcriteria.computeP3(p3values_test[0])
-# print("p3good:", p3_good)
-# p3_bad = SEGAcriteria.computeP3(p3values_test[1])
-# print("p3bad:", p3_bad)
-# p4_good = SEGAcriteria.computeP4(p4values_test[0])
-# print("p4good:", p4_good)
-# p4_bad = SEGAcriteria.computeP4(p4values_test[1])
-# print("p4bad:", p4_bad)
