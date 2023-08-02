@@ -1,5 +1,5 @@
 import math
-from pce_predict import PcePredict
+# from pce_predict import PcePredict
 from regression import regression
 from typing import List
 
@@ -47,11 +47,13 @@ class OutputPce:
         self.input_PDF = pdf
         self.degree = getPCEdegree(input_data)
         self.uniPoly = self.get_multivariate_orthogonalPoly(pdf, pce_degree)
-        self.alphaIdx = self.generateMultiIndex(self.degree, len(self.input_PDF))
+        self.alphaIdx = self.generateMultiIndex(
+            self.degree, len(self.input_PDF))
         self.uniP_val = self.evaluated_multivariate_orthoPoly(
             self.uniPoly, self.u_matrix
         )
-        self.Psi_alpha = self.compute_Psi_alpha_matrix(self.alphaIdx, self.uniP_val)
+        self.Psi_alpha = self.compute_Psi_alpha_matrix(
+            self.alphaIdx, self.uniP_val)
         self.coeffs = regression(self.output, self.Psi_alpha)
         self.cardAlpha = len(self.alphaIdx)
 
