@@ -63,7 +63,7 @@ class SEGAcriteria(object):
         return weights[0] / mode_gm + weights[1] / var_gm + weights[2] / abs(skew_gm)
 
     def computeP4(values):
-        weights = [0.95, 0.04, 0.01]
+        weights = [0.8, 0.15, 0.05]
         mode_gm = Stati.mode(values)
         mean = Stati.mean(values)
         var_gm = Stati.sampleVar(values)
@@ -134,8 +134,9 @@ class SEGAcriteria(object):
 def statsDict(input_vector):
     stats_dict = dict()
     stats_dict = {
-        "mode": Stati.mode(input_vector),
+        "mean": Stati.mean(input_vector),
         "median": Stati.median(input_vector),
+        "mode": Stati.mode(input_vector),
         "std": Stati.sampleStd(input_vector),
         "var": Stati.sampleVar(input_vector),
         "skew": Stati.skewness(input_vector),
@@ -162,25 +163,12 @@ def statsDict_p3(input_vector):
     return stats_dict
 
 
-def statsDict_ND():
-    stats_dict = dict()
-    stats_dict = {
-        "mode": "ND",
-        "median": "ND",
-        "std": "ND",
-        "var": "ND",
-        "skew": "ND",
-    }
-
-    return stats_dict
-
-
 def computeStats(metric):
     statsList = []
     for user in metric:
         results_user = metric[user][0:5]
         if Stati.sampleStd(results_user.to_numpy()) == 0:
-            phase2_resultsStats = {user: statsDict_ND()}
+            continue
         else:
             phase2_resultsStats = {user: statsDict(results_user.to_numpy())}
         statsList.append(phase2_resultsStats)
@@ -229,7 +217,7 @@ with open("hd_list.json", "w") as fp:
 p3_list = computeMetricHD(phase2_hausdorf)
 p4_list = computeMetricDSC(phase2_dice)
 
-with open("p3_list.json", "w") as fp:
+with open("p3_HD_list.json", "w") as fp:
     json.dump(p3_list, fp)
-with open("p4_list.json", "w") as fp:
+with open("p4_DSC_list.json", "w") as fp:
     json.dump(p4_list, fp)
