@@ -5,6 +5,7 @@ from pce import Pce
 from sensitivityAnalysis import SensitivityAnalysis
 from statisticalOp import Stati
 import matplotlib.pyplot as plt
+import json
 
 
 class SEGAsensitivity(object):
@@ -93,6 +94,8 @@ class SEGAcriteria(object):
         )
 
 
+# sensitivity = SEGAsensitivity()
+
 # p3_phase2 = pd.read_excel("test_fun/pj_phase2_SEGA23.xlsx")
 # p3values_test = np.transpose(
 #     p3_phase2.loc[:, ["tpvagenas", "iwm", "tpvagenas_inv", "iwm_inv"]].to_numpy())
@@ -127,4 +130,106 @@ class SEGAcriteria(object):
 # print("p4_dice_sunshine:", p4_sunshine)
 # print("p4_dice_test:", p4_test)
 
-sensitivity = SEGAsensitivity()
+
+def statsDict(input_vector):
+    stats_dict = dict()
+    stats_dict = {
+        "mode": Stati.mode(input_vector),
+        "median": Stati.median(input_vector),
+        "std": Stati.sampleStd(input_vector),
+        "var": Stati.sampleVar(input_vector),
+        "skew": Stati.skewness(input_vector),
+    }
+
+    return stats_dict
+
+
+def statsDict_p4(input_vector):
+    stats_dict = dict()
+    stats_dict = {
+        "p4": SEGAcriteria.computeP4(input_vector),
+    }
+
+    return stats_dict
+
+
+def statsDict_p3(input_vector):
+    stats_dict = dict()
+    stats_dict = {
+        "p3": SEGAcriteria.computeP3(input_vector),
+    }
+
+    return stats_dict
+
+
+def statsDict_ND():
+    stats_dict = dict()
+    stats_dict = {
+        "mode": "ND",
+        "median": "ND",
+        "std": "ND",
+        "var": "ND",
+        "skew": "ND",
+    }
+
+    return stats_dict
+
+
+def computeStats(metric):
+    statsList = []
+    for user in metric:
+        results_user = metric[user][0:5]
+        if Stati.sampleStd(results_user.to_numpy()) == 0:
+            phase2_resultsStats = {user: statsDict_ND()}
+        else:
+            phase2_resultsStats = {user: statsDict(results_user.to_numpy())}
+        statsList.append(phase2_resultsStats)
+    return statsList
+
+
+def computeMetricDSC(metric):
+    statsList = []
+    for user in metric:
+        results_user = metric[user][0:5]
+        phase2_resultsStats = {user: statsDict_p4(results_user.to_numpy())}
+        statsList.append(phase2_resultsStats)
+    return statsList
+
+
+def computeMetricHD(metric):
+    statsList = []
+    for user in metric:
+        results_user = metric[user][0:5]
+        phase2_resultsStats = {user: statsDict_p3(results_user.to_numpy())}
+        statsList.append(phase2_resultsStats)
+    return statsList
+
+
+phase2_results = pd.read_excel("test_fun/phase2_results.xlsx", dtype=np.float64)
+user_names = list(
+    pd.read_excel("test_fun/phase2_results.xlsx", nrows=1, engine="openpyxl")
+)
+
+phase2_jacobians = phase2_results[0:5]
+phase2_dice = phase2_results[5:10]
+phase2_hausdorf = phase2_results[10:15]
+
+jaco_list = computeStats(phase2_jacobians)
+dsc_list = computeStats(phase2_dice)
+hd_list = computeStats(phase2_hausdorf)
+
+with open("jacobian_list.json", "w") as fp:
+    json.dump(jaco_list, fp)
+with open("dsc_list.json", "w") as fp:
+    json.dump(dsc_list, fp)
+with open("hd_list.json", "w") as fp:
+    json.dump(hd_list, fp)
+
+
+p3_list = computeMetricHD(phase2_hausdorf)
+p4_list = computeMetricDSC(phase2_dice)
+
+with open("p3_list.json", "w") as fp:
+    json.dump(p3_list, fp)
+with open("p4_list.json", "w") as fp:
+    json.dump(p4_list, fp)
