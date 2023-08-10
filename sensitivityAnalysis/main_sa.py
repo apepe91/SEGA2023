@@ -94,7 +94,7 @@ class SEGAcriteria(object):
             + weights[3] / Stati.mean(invalid_elements)
         )
 
-    def printFinalPJ(rank_fin, names, rank_mode, rank_var, rank_skew, rank_invElem):
+    def printFinalrankJ(rank_fin, names, rank_mode, rank_var, rank_skew, rank_invElem):
         sortedRank = np.argsort(rank_fin)
         for elem in sortedRank:
             print(
@@ -110,6 +110,53 @@ class SEGAcriteria(object):
                 " - Rank inv. elem.:",
                 rank_invElem[elem] + 1,
             )
+
+    def printFinalRankDSC_HD(rank_fin, names, rank_mode, rank_var, rank_skew):
+        sortedRank = np.argsort(rank_fin)
+        print("-" * 79)
+        print(
+            "| {:^15s} | {:^12s} | {:^12s} | {:^12s} | {:^12s} |".format(
+                "user", "fin. rank", "rank mode", "rank var", "rank skew"
+            )
+        )
+        print("-" * 79)
+        for userNr in sortedRank:
+            print(
+                "| {:<15s} | {:^12.3f} | {:^12.1f} | {:^12.1f} | {:^12.1f} |".format(
+                    names[userNr],
+                    rank_fin[userNr],
+                    rank_mode[userNr],
+                    rank_var[userNr],
+                    rank_skew[userNr],
+                )
+            )
+
+        print("-" * 79)
+
+    def printFinalRank_HD(rank_fin, rankings):
+        sortedRank = np.argsort(rank_fin) + 1
+        print("-" * 79)
+        print(
+            "| {:^15s} | {:^12s} | {:^12s} | {:^12s} | {:^12s} |".format(
+                "user", "fin. rank", "rank mode", "rank var", "rank skew"
+            )
+        )
+        print("-" * 79)
+        for userNr in sortedRank:
+            print(
+                "| {:<15s} | {:^12.3f} | {:^12.1f} | {:^12.1f} | {:^12.1f} |".format(
+                    rankings[0][userNr - 1],
+                    rank_fin[userNr - 1],
+                    rankings[1][userNr - 1],
+                    rankings[2][userNr - 1],
+                    rankings[3][userNr - 1],
+                    # rank_mode[userNr],
+                    # rank_var[userNr],
+                    # rank_skew[userNr],
+                )
+            )
+
+        print("-" * 79)
 
     def rankPJ(values, invElem, names):
         weights = [0.3, 0.25, 0.15, 0.3]
@@ -146,8 +193,74 @@ class SEGAcriteria(object):
                 + rank_invElem[num] * weights[3]
             )
 
-        SEGAcriteria.printFinalPJ(
+        SEGAcriteria.printFinalrankJ(
             rank_fin, names_vec, rank_mode, rank_var, rank_skew, rank_invElem
+        )
+
+        return rank_fin
+
+    def rankDSC(values, names):
+        weights = [0.5, 0.3, 0.2]
+        mode_vec = []
+        var_vec = []
+        skew_vec = []
+
+        names_vec = []
+        for num, name in enumerate(names):
+            mode_vec.append(Stati.median(values[:, num]))
+            var_vec.append(Stati.sampleVar(values[:, num]))
+            skew_vec.append(Stati.skewness(values[:, num]))
+            names_vec.append(name)
+        skew_vec = [abs(elem) for elem in skew_vec]
+
+        rank_mode = np.argsort(mode_vec)[::-1]
+        rank_var = np.argsort(var_vec)
+        rank_skew = np.argsort(skew_vec)
+
+        rank_fin = []
+        for num, _ in enumerate(rank_mode):
+            rank_fin.append(
+                rank_mode[num] * weights[0]
+                + rank_var[num] * weights[1]
+                + rank_skew[num] * weights[2]
+            )
+
+        SEGAcriteria.printFinalRankDSC_HD(
+            rank_fin, names_vec, rank_mode, rank_var, rank_skew
+        )
+
+        return rank_fin
+
+    def rankHD(values, names):
+        weights = [0.5, 0.3, 0.2]
+        # mode_vec = np.array([])
+        mode_vec = []
+        var_vec = []
+        skew_vec = []
+
+        names_vec = []
+        for num, name in enumerate(names):
+            # mode_vec = np.append(mode_vec, np.array([Stati.median(values[:, num])]))
+            mode_vec.append(Stati.median(values[:, num]))
+            var_vec.append(Stati.sampleVar(values[:, num]))
+            skew_vec.append(Stati.skewness(values[:, num]))
+            names_vec.append(name)
+        skew_vec = [abs(elem) for elem in skew_vec]
+
+        rank_mode = np.argsort(mode_vec) + 1
+        rank_var = np.argsort(var_vec) + 1
+        rank_skew = np.argsort(skew_vec) + 1
+
+        rank_fin = []
+        for num, _ in enumerate(rank_mode):
+            rank_fin.append(
+                rank_mode[num] * weights[0]
+                + rank_var[num] * weights[1]
+                + rank_skew[num] * weights[2]
+            )
+
+        SEGAcriteria.printFinalRank_HD(
+            rank_fin, [names_vec, rank_mode, rank_var, rank_skew]
         )
 
         return rank_fin
@@ -228,6 +341,10 @@ phase2_hausdorf = phase2_results[15:20]
 pJ_phase2 = SEGAcriteria.rankPJ(
     phase2_jacobians.to_numpy(), phase2_invElem.to_numpy(), user_names
 )
+print("--> HD")
+pHD_phase2 = SEGAcriteria.rankHD(phase2_hausdorf.to_numpy(), user_names)
+print("--> DSC")
+pDSC_phase2 = SEGAcriteria.rankDSC(phase2_dice.to_numpy(), user_names)
 
 jaco_list = computeStats(phase2_jacobians)
 dsc_list = computeStats(phase2_dice)
