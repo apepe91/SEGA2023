@@ -94,7 +94,7 @@ class SEGAcriteria(object):
             + weights[3] / Stati.mean(invalid_elements)
         )
 
-    def printFinalrankJ(rank_fin, names, rank_mode, rank_var, rank_skew, rank_invElem):
+    def printFinalRank_J(rank_fin, names, rank_median, rank_var, rank_skew, rank_invElem):
         sortedRank = np.argsort(rank_fin)
         for elem in sortedRank:
             print(
@@ -102,7 +102,7 @@ class SEGAcriteria(object):
                 " - Final rank:",
                 rank_fin[elem].round(3) + 1,
                 " - Rank mode:",
-                rank_mode[elem] + 1,
+                rank_median[elem] + 1,
                 " - Rank variance:",
                 rank_var[elem] + 1,
                 " - Rank skewness:",
@@ -111,7 +111,7 @@ class SEGAcriteria(object):
                 rank_invElem[elem] + 1,
             )
 
-    def printFinalRankDSC_HD(rank_fin, names, rank_mode, rank_var, rank_skew):
+    def printFinalRank_DSC(rank_fin, names, rank_mode, rank_var, rank_skew):
         sortedRank = np.argsort(rank_fin)
         print("-" * 79)
         print(
@@ -150,9 +150,7 @@ class SEGAcriteria(object):
                     rankings[1][userNr - 1],
                     rankings[2][userNr - 1],
                     rankings[3][userNr - 1],
-                    # rank_mode[userNr],
-                    # rank_var[userNr],
-                    # rank_skew[userNr],
+
                 )
             )
 
@@ -160,7 +158,7 @@ class SEGAcriteria(object):
 
     def rankPJ(values, invElem, names):
         weights = [0.3, 0.25, 0.15, 0.3]
-        mode_vec = []
+        median_vec = []
         var_vec = []
         skew_vec = []
         invElem_vec = []
@@ -168,10 +166,10 @@ class SEGAcriteria(object):
         for num, name in enumerate(names):
             if Stati.sampleVar(values[:, num]) == 0:
                 continue
-            if Stati.mode(values[:, num]) < 0:
-                mode_vec.append(Stati.mode(values[:, num]) * (-1))
+            if Stati.median(values[:, num]) < 0:
+                median_vec.append(Stati.median(values[:, num]) * (-1))
             else:
-                mode_vec.append(Stati.mode(values[:, num]))
+                median_vec.append(Stati.median(values[:, num]))
 
             var_vec.append(Stati.sampleVar(values[:, num]))
             skew_vec.append(Stati.skewness(values[:, num]))
@@ -179,89 +177,89 @@ class SEGAcriteria(object):
             names_vec.append(name)
         skew_vec = [abs(elem) for elem in skew_vec]
 
-        rank_mode = np.argsort(mode_vec)
+        rank_median = np.argsort(median_vec)
         rank_var = np.argsort(var_vec)
         rank_skew = np.argsort(skew_vec)
         rank_invElem = np.argsort(invElem_vec)
 
         rank_fin = []
-        for num, _ in enumerate(rank_mode):
+        for num, _ in enumerate(rank_median):
             rank_fin.append(
-                rank_mode[num] * weights[0]
+                rank_median[num] * weights[0]
                 + rank_var[num] * weights[1]
                 + rank_skew[num] * weights[2]
                 + rank_invElem[num] * weights[3]
             )
 
-        SEGAcriteria.printFinalrankJ(
-            rank_fin, names_vec, rank_mode, rank_var, rank_skew, rank_invElem
-        )
+        # SEGAcriteria.printFinalrankJ(
+        #     rank_fin, names_vec, rank_median, rank_var, rank_skew, rank_invElem
+        # )
 
         return rank_fin
 
     def rankDSC(values, names):
         weights = [0.5, 0.3, 0.2]
-        mode_vec = []
+        median_vec = []
         var_vec = []
         skew_vec = []
 
         names_vec = []
         for num, name in enumerate(names):
-            mode_vec.append(Stati.median(values[:, num]))
+            median_vec.append(Stati.median(values[:, num]))
             var_vec.append(Stati.sampleVar(values[:, num]))
             skew_vec.append(Stati.skewness(values[:, num]))
             names_vec.append(name)
         skew_vec = [abs(elem) for elem in skew_vec]
 
-        rank_mode = np.argsort(mode_vec)[::-1]
+        rank_median = np.argsort(median_vec)[::-1]
         rank_var = np.argsort(var_vec)
         rank_skew = np.argsort(skew_vec)
 
         rank_fin = []
-        for num, _ in enumerate(rank_mode):
+        for num, _ in enumerate(rank_median):
             rank_fin.append(
-                rank_mode[num] * weights[0]
+                rank_median[num] * weights[0]
                 + rank_var[num] * weights[1]
                 + rank_skew[num] * weights[2]
             )
 
-        SEGAcriteria.printFinalRankDSC_HD(
-            rank_fin, names_vec, rank_mode, rank_var, rank_skew
-        )
+        # SEGAcriteria.printFinalRankDSC_HD(
+        #     rank_fin, names_vec, rank_median, rank_var, rank_skew
+        # )
 
         return rank_fin
 
     def rankHD(values, names):
-        weights = [0.5, 0.3, 0.2]
+        weights = [0.5, 0.3, 0.2] # remember original [0.6 0.25 0.15]
         # mode_vec = np.array([])
-        mode_vec = []
+        median_vec = []
         var_vec = []
         skew_vec = []
 
         names_vec = []
         for num, name in enumerate(names):
             # mode_vec = np.append(mode_vec, np.array([Stati.median(values[:, num])]))
-            mode_vec.append(Stati.median(values[:, num]))
+            median_vec.append(Stati.median(values[:, num]))
             var_vec.append(Stati.sampleVar(values[:, num]))
             skew_vec.append(Stati.skewness(values[:, num]))
             names_vec.append(name)
         skew_vec = [abs(elem) for elem in skew_vec]
 
-        rank_mode = np.argsort(mode_vec) + 1
+        rank_median = np.argsort(median_vec) + 1
         rank_var = np.argsort(var_vec) + 1
         rank_skew = np.argsort(skew_vec) + 1
 
         rank_fin = []
-        for num, _ in enumerate(rank_mode):
+        for num, _ in enumerate(rank_median):
             rank_fin.append(
-                rank_mode[num] * weights[0]
+                rank_median[num] * weights[0]
                 + rank_var[num] * weights[1]
                 + rank_skew[num] * weights[2]
             )
 
-        SEGAcriteria.printFinalRank_HD(
-            rank_fin, [names_vec, rank_mode, rank_var, rank_skew]
-        )
+        # SEGAcriteria.printFinalRank_HD(
+        #     rank_fin, [names_vec, rank_mode, rank_var, rank_skew]
+        # )
 
         return rank_fin
 
@@ -338,6 +336,7 @@ phase2_jacobians = phase2_results[5:10]
 phase2_dice = phase2_results[10:15]
 phase2_hausdorf = phase2_results[15:20]
 
+print("--> JACOBIAN")
 pJ_phase2 = SEGAcriteria.rankPJ(
     phase2_jacobians.to_numpy(), phase2_invElem.to_numpy(), user_names
 )
