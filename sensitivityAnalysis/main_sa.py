@@ -336,6 +336,8 @@ phase2_jacobians = phase2_results[5:10]
 phase2_dice = phase2_results[10:15]
 phase2_hausdorf = phase2_results[15:20]
 
+
+
 print("--> JACOBIAN")
 pJ_phase2 = SEGAcriteria.rankPJ(
     phase2_jacobians.to_numpy(), phase2_invElem.to_numpy(), user_names
